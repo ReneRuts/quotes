@@ -110,7 +110,10 @@ async def init_database():
                 embed_color TEXT DEFAULT '#667eea',
                 show_images BOOLEAN DEFAULT 0,
                 custom_footer TEXT,
-                require_approval BOOLEAN DEFAULT 1
+                require_approval BOOLEAN DEFAULT 1,
+                disabled_categories TEXT DEFAULT '[]',
+                games_enabled BOOLEAN DEFAULT 1,
+                custom_quotes_enabled BOOLEAN DEFAULT 1
             )
         """)
         
@@ -347,8 +350,27 @@ async def get_server_customization(guild_id: int):
                 (guild_id,)
             )
             await db.commit()
-            return (guild_id, '#667eea', 0, None, 1)
+            return (guild_id, '#667eea', 0, None, 1, '[]', 1, 1)
         return result
+
+async def get_disabled_categories(guild_id: int):
+    """Get list of disabled categories for a server"""
+    import json
+    customization = await get_server_customization(guild_id)
+    try:
+        return json.loads(customization[5]) if len(customization) > 5 else []
+    except:
+        return []
+
+async def is_games_enabled(guild_id: int):
+    """Check if games/stats features are enabled"""
+    customization = await get_server_customization(guild_id)
+    return customization[6] if len(customization) > 6 else True
+
+async def is_custom_quotes_enabled(guild_id: int):
+    """Check if custom quotes are enabled"""
+    customization = await get_server_customization(guild_id)
+    return customization[7] if len(customization) > 7 else True
 
 async def update_server_customization(guild_id: int, **kwargs):
     """Update server customization"""

@@ -192,5 +192,161 @@ class Setup(commands.Cog):
                 ephemeral=True
             )
 
+    @app_commands.command(
+        name="admin",
+        description="Manage advanced server settings (Admin only)"
+    )
+    @app_commands.describe(
+        feature="Feature to toggle",
+        enabled="Enable or disable the feature"
+    )
+    @app_commands.choices(feature=[
+        app_commands.Choice(name="Games & Stats System", value="games"),
+        app_commands.Choice(name="Custom Quotes", value="custom_quotes"),
+        app_commands.Choice(name="Quote Approval Required", value="approval")
+    ])
+    async def admin(
+        self,
+        interaction: discord.Interaction,
+        feature: str,
+        enabled: bool
+    ):
+        if not await self.check_permissions(interaction):
+            return
+
+        from utils.database import update_server_customization
+        
+        setting_map = {
+            "games": "games_enabled",
+            "custom_quotes": "custom_quotes_enabled",
+            "approval": "require_approval"
+        }
+        
+        setting_name = setting_map.get(feature)
+        if not setting_name:
+            return await interaction.response.send_message(
+                "❌ Invalid feature selected.",
+                ephemeral=True
+            )
+        
+        await update_server_customization(interaction.guild.id, **{setting_name: enabled})
+        
+        feature_names = {
+            "games": "Games & Stats System",
+            "custom_quotes": "Custom Quotes",
+            "approval": "Quote Approval Required"
+        }
+        
+        status = "✅ Enabled" if enabled else "❌ Disabled"
+        
+        embed = discord.Embed(
+            title="⚙️ Settings Updated",
+            description=f"{feature_names[feature]}: {status}",
+            color=discord.Color.green() if enabled else discord.Color.red()
+        )
+        
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
+    @app_commands.command(
+        name="categories",
+        description="Manage quote categories (Admin only)"
+    )
+    @app_commands.describe(
+        action="Enable or disable a category",
+        category="The category to manage"
+    )
+    @app_commands.choices(
+        action=[
+            app_commands.Choice(name="Enable", value="enable"),
+            app_commands.Choice(name="Disable", value="disable"),
+            app_commands.Choice(name="View Disabled", value="view")
+        ],
+        category=[
+            app_commands.Choice(name="Motivational", value="motivational"),
+            app_commands.Choice(name="Funny", value="funny"),
+            app_commands.Choice(name="Inspirational", value="inspirational"),
+            app_commands.Choice(name="Love", value="love"),
+            app_commands.Choice(name="Life", value="life"),
+            app_commands.Choice(name="Success", value="success"),
+            app_commands.Choice(name="Wisdom", value="wisdom"),
+            app_commands.Choice(name="Friendship", value="friendship"),
+            app_commands.Choice(name="Happiness", value="happiness"),
+            app_commands.Choice(name="Programming", value="programming"),
+            app_commands.Choice(name="Gaming", value="gaming"),
+            app_commands.Choice(name="Anime", value="anime"),
+            app_commands.Choice(name="Movies", value="movies"),
+            app_commands.Choice(name="Books", value="books"),
+            app_commands.Choice(name="General", value="general")
+        ]
+    )
+    async def categories_cmd(
+        self,
+        interaction: discord.Interaction,
+        action: str,
+        category: str = None
+    ):
+        if not await self.check_permissions(interaction):
+            return
+
+        from utils.database import get_disabled_categories, update_server_customization
+        import json
+        
+        disabled = await get_disabled_categories(interaction.guild.id)
+        
+        if action == "view":
+            if not disabled:
+                embed = discord.Embed(
+                    title="📂 Disabled Categories",
+                    description="All categories are currently enabled!",
+                    color=discord.Color.green()
+                )
+            else:
+                embed = discord.Embed(
+                    title="📂 Disabled Categories",
+                    description="\n".join([f"• `{cat}`" for cat in disabled]),
+                    color=discord.Color.orange()
+                )
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
+        
+        if not category:
+            return await interaction.response.send_message(
+                "❌ Please specify a category.",
+                ephemeral=True
+            )
+        
+        if action == "disable":
+            if category not in disabled:
+                disabled.append(category)
+                await update_server_customization(
+                    interaction.guild.id,
+                    disabled_categories=json.dumps(disabled)
+                )
+                await interaction.response.send_message(
+                    f"✅ Category `{category}` has been disabled.",
+                    ephemeral=True
+                )
+            else:
+                await interaction.response.send_message(
+                    f"❌ Category `{category}` is already disabled.",
+                    ephemeral=True
+                )
+        
+        elif action == "enable":
+            if category in disabled:
+                disabled.remove(category)
+                await update_server_customization(
+                    interaction.guild.id,
+                    disabled_categories=json.dumps(disabled)
+                )
+                await interaction.response.send_message(
+                    f"✅ Category `{category}` has been enabled.",
+                    ephemeral=True
+                )
+            else:
+                await interaction.response.send_message(
+                    f"❌ Category `{category}` is already enabled.",
+                    ephemeral=True
+                )
+
 async def setup(bot):
     await bot.add_cog(Setup(bot))

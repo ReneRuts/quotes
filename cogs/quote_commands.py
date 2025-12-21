@@ -21,6 +21,23 @@ class QuoteCommands(commands.Cog):
         category="Get quotes from a category",
         keyword="Search for quotes containing a keyword"
     )
+    @app_commands.choices(category=[
+        app_commands.Choice(name="Motivational", value="motivational"),
+        app_commands.Choice(name="Funny", value="funny"),
+        app_commands.Choice(name="Inspirational", value="inspirational"),
+        app_commands.Choice(name="Love", value="love"),
+        app_commands.Choice(name="Life", value="life"),
+        app_commands.Choice(name="Success", value="success"),
+        app_commands.Choice(name="Wisdom", value="wisdom"),
+        app_commands.Choice(name="Friendship", value="friendship"),
+        app_commands.Choice(name="Happiness", value="happiness"),
+        app_commands.Choice(name="Programming", value="programming"),
+        app_commands.Choice(name="Gaming", value="gaming"),
+        app_commands.Choice(name="Anime", value="anime"),
+        app_commands.Choice(name="Movies", value="movies"),
+        app_commands.Choice(name="Books", value="books"),
+        app_commands.Choice(name="General", value="general")
+    ])
     async def quote(
         self,
         interaction: discord.Interaction,

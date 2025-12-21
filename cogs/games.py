@@ -11,6 +11,14 @@ class Games(commands.Cog):
     @app_commands.command(name="stats", description="View your statistics")
     @app_commands.describe(user="User to view stats for (optional)")
     async def stats(self, interaction: discord.Interaction, user: discord.Member = None):
+        from utils.database import is_games_enabled
+        
+        if not await is_games_enabled(interaction.guild.id):
+            return await interaction.response.send_message(
+                "❌ Games & Stats features are disabled on this server.",
+                ephemeral=True
+            )
+        
         target_user = user or interaction.user
         
         await interaction.response.defer(ephemeral=(user is None))
@@ -42,6 +50,14 @@ class Games(commands.Cog):
         app_commands.Choice(name="Quotes Submitted", value="quotes_submitted")
     ])
     async def leaderboard(self, interaction: discord.Interaction, type: str = "xp"):
+        from utils.database import is_games_enabled
+        
+        if not await is_games_enabled(interaction.guild.id):
+            return await interaction.response.send_message(
+                "❌ Games & Stats features are disabled on this server.",
+                ephemeral=True
+            )
+        
         await interaction.response.defer()
         
         leaderboard = await get_leaderboard(interaction.guild.id, type, limit=10)
@@ -69,6 +85,14 @@ class Games(commands.Cog):
 
     @app_commands.command(name="streak", description="View your current streak")
     async def streak(self, interaction: discord.Interaction):
+        from utils.database import is_games_enabled
+        
+        if not await is_games_enabled(interaction.guild.id):
+            return await interaction.response.send_message(
+                "❌ Games & Stats features are disabled on this server.",
+                ephemeral=True
+            )
+        
         await interaction.response.defer(ephemeral=True)
         
         user_data = await get_user_stats(interaction.guild.id, interaction.user.id)
@@ -107,6 +131,14 @@ class Games(commands.Cog):
 
     @app_commands.command(name="level", description="View your level and XP progress")
     async def level(self, interaction: discord.Interaction):
+        from utils.database import is_games_enabled
+        
+        if not await is_games_enabled(interaction.guild.id):
+            return await interaction.response.send_message(
+                "❌ Games & Stats features are disabled on this server.",
+                ephemeral=True
+            )
+        
         await interaction.response.defer(ephemeral=True)
         
         user_data = await get_user_stats(interaction.guild.id, interaction.user.id)

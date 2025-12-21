@@ -24,13 +24,45 @@ class CustomQuotes(commands.Cog):
         author="Who said it",
         category="Quote category"
     )
+    @app_commands.choices(category=[
+        app_commands.Choice(name="Motivational", value="motivational"),
+        app_commands.Choice(name="Funny", value="funny"),
+        app_commands.Choice(name="Inspirational", value="inspirational"),
+        app_commands.Choice(name="Love", value="love"),
+        app_commands.Choice(name="Life", value="life"),
+        app_commands.Choice(name="Success", value="success"),
+        app_commands.Choice(name="Wisdom", value="wisdom"),
+        app_commands.Choice(name="Friendship", value="friendship"),
+        app_commands.Choice(name="Happiness", value="happiness"),
+        app_commands.Choice(name="Programming", value="programming"),
+        app_commands.Choice(name="Gaming", value="gaming"),
+        app_commands.Choice(name="Anime", value="anime"),
+        app_commands.Choice(name="Movies", value="movies"),
+        app_commands.Choice(name="Books", value="books"),
+        app_commands.Choice(name="General", value="general")
+    ])
     async def addquote(
         self,
         interaction: discord.Interaction,
         quote: str,
         author: str,
-        category: str = "general"
+        category: str
     ):
+        from utils.database import is_custom_quotes_enabled, get_disabled_categories
+        
+        if not await is_custom_quotes_enabled(interaction.guild.id):
+            return await interaction.response.send_message(
+                "❌ Custom quotes are disabled on this server.",
+                ephemeral=True
+            )
+        
+        disabled_categories = await get_disabled_categories(interaction.guild.id)
+        if category in disabled_categories:
+            return await interaction.response.send_message(
+                f"❌ The category `{category}` is currently disabled on this server.",
+                ephemeral=True
+            )
+        
         if len(quote) < 10:
             return await interaction.response.send_message(
                 "❌ Quote must be at least 10 characters long.",
@@ -40,13 +72,6 @@ class CustomQuotes(commands.Cog):
         if len(quote) > 500:
             return await interaction.response.send_message(
                 "❌ Quote must be less than 500 characters.",
-                ephemeral=True
-            )
-        
-        category = category.lower()
-        if category not in CATEGORIES:
-            return await interaction.response.send_message(
-                f"❌ Invalid category. Choose from: {', '.join(CATEGORIES)}",
                 ephemeral=True
             )
         
@@ -225,16 +250,6 @@ class CustomQuotes(commands.Cog):
             f"✅ Quote #{quote_id} has been approved!",
             ephemeral=True
         )
-
-    @app_commands.command(name="categories", description="View all available categories")
-    async def categories(self, interaction: discord.Interaction):
-        embed = discord.Embed(
-            title="📂 Available Categories",
-            description="\n".join([f"• `{cat}`" for cat in CATEGORIES]),
-            color=discord.Color.purple()
-        )
-        embed.set_footer(text="Use these categories when adding quotes with /addquote")
-        await interaction.response.send_message(embed=embed, ephemeral=True)
 
 async def setup(bot):
     await bot.add_cog(CustomQuotes(bot))
