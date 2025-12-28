@@ -96,7 +96,7 @@ class Quotes(commands.Cog):
         # If never sent before
         if last_sent is None:
             if local_now >= scheduled_today:
-                await self.send_quote(guild, channel_id)
+                await self.send_quote(guild, channel_id, local_now)
             return
 
         # Convert last_sent to server timezone
@@ -108,9 +108,9 @@ class Quotes(commands.Cog):
         
         # Check all conditions
         if local_now >= next_scheduled and local_now >= scheduled_today and last_sent_local < scheduled_today:
-            await self.send_quote(guild, channel_id)
+            await self.send_quote(guild, channel_id, local_now)
 
-    async def send_quote(self, guild, channel_id):
+    async def send_quote(self, guild, channel_id, local_now):
         try:
             channel = self.bot.get_channel(channel_id)
             if not channel:
