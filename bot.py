@@ -15,7 +15,7 @@ if not TOKEN or not APPLICATION_ID:
     print("❌ Error: Missing DISCORD_TOKEN or APPLICATION_ID in .env file")
     exit(1)
 
-intents = discord.Intents.default()
+intents = discord.Intents.none()
 intents.guilds = True
 intents.messages = True
 intents.message_content = True

@@ -129,8 +129,11 @@ class Quotes(commands.Cog):
             
             self.last_sent[guild.id] = datetime.now(pytz.utc)
             self.save_last_sent()
+            config = get_server_settings(guild.id)
+            interval_hours = config.get("interval",24)
+            next_send = local_now + timedelta(hours=interval_hours)
             
-            print(f"✅ Sent quote to {guild.name}")
+            print(f"✅ Sent quote to {guild.name} ({guild.id}) at {local_now.strftime('%Y-%m-%d %H:%M:%S')}. Expected: {next_send.strftime('%Y-%m-%d %H:%M:%S')}")
 
         except Exception as e:
             print(f"❌ Error sending quote to {guild.name}: {e}")

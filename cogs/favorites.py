@@ -99,11 +99,15 @@ class Favorites(commands.Cog):
         except:
             return
         
+        if not hasattr(message, "content") or not message.content:
+            return
+
         # Only process bot's messages
         if message.author.id != self.bot.user.id:
             return
         
         # Extract quote text and author
+        
         content = message.content
         
         # Remove role mention if present
