@@ -57,10 +57,15 @@ class Quotes(commands.Cog):
         except Exception as e:
             print(f"❌ Error saving last_sent.json: {e}")
 
-    @tasks.loop(minutes=1)
+    @tasks.loop(seconds=60)
     async def quote_loop(self):
         await self.bot.wait_until_ready()
         
+        now = datetime.now()
+        seconds_to_wait = 60 - now.second
+        if second_to_wait < 60:
+            await asyncio.sleep(seconds_to_wait)
+
         for guild in self.bot.guilds:
             try:
                 await self.check_and_send_quote(guild)
