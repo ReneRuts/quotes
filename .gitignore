@@ -8,8 +8,6 @@ __pycache__/
 venv/
 env/
 
-server_config.json
-last_sent.json
 error-files/
 
 .vscode/
