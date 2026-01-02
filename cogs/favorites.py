@@ -102,39 +102,34 @@ class Favorites(commands.Cog):
         if not hasattr(message, "content") or not message.content:
             return
 
-        # Only process bot's messages
         if message.author.id != self.bot.user.id:
             return
-        
-        # Extract quote text and author
-        
-        content = message.content
-        
-        # Remove role mention if present
-        content = re.sub(r'<@&\d+>\s*', '', content)
-        
-        # Parse quote format: "📖 **Daily Quote:**\n_quote_\n— author"
-        quote_match = re.search(r'\*\*Daily Quote:\*\*\n_(.+)_\n— (.+)', content, re.DOTALL)
-        
-        if not quote_match:
-            # Try bonus quote format
-            quote_match = re.search(r'\*\*Bonus Quote\*\*\n\n_(.+)_\n\n— \*\*(.+)\*\*', content, re.DOTALL)
-        
-        if quote_match:
-            quote_text = quote_match.group(1).strip()
-            quote_author = quote_match.group(2).strip()
+
+        content = message.content.strip()
+
+        content = re.sub(r'<@&\d+>\s*', '', content).strip()
+
+        pattern = r'["“]?_?(?P<quote>.+?)_?["”]?\s*[\n\r]+[-—]\s*\*?\*?(?P<author>.+?)\*?\*?$'
+
+        match = re.search(pattern, content, re.DOTALL)
+
+        if not match:
+            return
+
+        quote_text = match.group("quote").strip()
+        quote_author = match.group("author").strip()
+
+        quote_author = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', quote_author)
+
             
-            # Remove markdown links from author (GitHub links)
-            quote_author = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', quote_author)
+        success = await add_favorite(payload.user_id, quote_text, quote_author, payload.guild_id)
             
-            success = await add_favorite(payload.user_id, quote_text, quote_author, payload.guild_id)
-            
-            if success:
-                try:
-                    user = await self.bot.fetch_user(payload.user_id)
-                    await user.send(f"❤️ Quote saved to your favorites!\n\n_{quote_text}_\n— **{quote_author}**")
-                except:
-                    pass  # User has DMs disabled
+        if success:
+            try:
+                user = await self.bot.fetch_user(payload.user_id)
+                await user.send(f"❤️ Quote saved to your favorites!\n\n_{quote_text}_\n— **{quote_author}**")
+            except:
+                pass  # User has DMs disabled
 
 async def setup(bot):
     await bot.add_cog(Favorites(bot))
