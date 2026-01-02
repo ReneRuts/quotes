@@ -45,6 +45,13 @@
 - **Discord Support Server**: [Join here](https://discord.gg/5jkADM2Wt5)
 - **Discord**: reneruts
 
+## 📜 Legal
+
+- **[Privacy Policy](PRIVACY_POLICY.md)** - How we collect and protect your data
+- **[Terms of Service](TERMS_OF_SERVICE.md)** - Rules and guidelines for using the bot
+
+By using Quote Bot, you agree to our Terms of Service and Privacy Policy.
+
 ## 🙏 Acknowledgments
 
 - Quotes provided by [ZenQuotes API](https://zenquotes.io/)
